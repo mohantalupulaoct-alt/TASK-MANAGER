@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,33 +8,361 @@
 <style>
 
 /* ===== BODY ===== */
-/* Submitted Task Style */
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #111 0%, #000 60%);
+    color: #ff4d4d;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.menu-btn {
+    font-size: 26px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+h1 {
+    margin: 0;
+}
+
+/* ===== SIDE MENU ===== */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 260px;
+    height: 100%;
+    background: #0d0d0d;
+    padding: 80px 20px 20px;
+    transition: left 0.4s ease;
+    z-index: 1000;
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 900;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ===== ACCORDION ===== */
+.accordion-header {
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid #ff4d4d;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.accordion-content.open {
+    max-height: 400px;
+}
+
+/* ===== INPUTS ===== */
+input, button {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ff4d4d;
+    background: #111;
+    color: #ff4d4d;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ff4d4d;
+    color: black;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    padding: 20px;
+}
+
+/* ===== TASK CARD ===== */
+.task {
+    background: #111;
+    padding: 15px;
+    margin-top: 15px;
+    border-left: 4px solid #ff4d4d;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
 .task.submitted {
     border-left: 4px solid #00ff88;
     box-shadow: 0 0 15px rgba(0,255,120,0.4);
-    transition: 0.3s ease;
 }
 
-.task.submitted strong {
-    color: #00ff88;
-}
-
+.task.submitted strong,
 .task.submitted small {
     color: #00ff88;
 }
 
-/* Fade success animation */
-@keyframes successPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.03); }
-    100% { transform: scale(1); }
+.actions {
+    margin-top: 8px;
 }
 
-.task.submitted {
-    animation: successPop 0.4s ease;
+.actions button {
+    margin-right: 8px;
+    font-size: 12px;
 }
-body {
-    background: radial-gradient(circle at top, #111 0%, #000 60%);
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.rocket {
+    font-size: 50px;
+    animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <h1>Deadline Manager</h1>
+</div>
+
+<div class="side-menu" id="sideMenu">
+
+    <!-- ADD TASK -->
+    <div class="accordion-header" onclick="toggleSection('addSection')">
+        ➕ Add Task
+    </div>
+    <div class="accordion-content" id="addSection">
+        <input type="text" id="taskInput" placeholder="Enter Task">
+        <input type="date" id="deadlineInput">
+        <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <!-- UPCOMING -->
+    <div class="accordion-header" onclick="toggleSection('upcomingSection')">
+        📅 Upcoming Tasks
+    </div>
+    <div class="accordion-content" id="upcomingSection">
+        <div onclick="filterTasks(1)">Within 1 Day</div>
+        <div onclick="filterTasks(7)">Within 1 Week</div>
+        <div onclick="filterTasks(14)">Within 2 Weeks</div>
+        <div onclick="filterTasks(30)">Within 1 Month</div>
+        <div onclick="renderTasks()">Show All</div>
+    </div>
+
+</div>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="main-content">
+    <div id="taskList"></div>
+</div>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+/* MENU */
+function toggleMenu() {
+    document.getElementById("sideMenu").classList.toggle("active");
+    document.getElementById("overlay").classList.toggle("active");
+}
+
+function closeMenu() {
+    document.getElementById("sideMenu").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+}
+
+/* ACCORDION */
+function toggleSection(id) {
+    document.getElementById(id).classList.toggle("open");
+}
+
+/* ADD TASK */
+function addTask() {
+    const text = document.getElementById("taskInput").value.trim();
+    const deadline = document.getElementById("deadlineInput").value;
+
+    if (!text || !deadline) {
+        alert("Enter task and deadline");
+        return;
+    }
+
+    tasks.push({ text, deadline, status: "Pending" });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    document.getElementById("taskInput").value = "";
+    document.getElementById("deadlineInput").value = "";
+
+    renderTasks();
+}
+
+/* DELETE */
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+/* SUBMIT */
+function markSubmitted(index) {
+    tasks[index].status = "Submitted";
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+/* FILTER */
+function filterTasks(days) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const limit = new Date();
+    limit.setDate(today.getDate() + days);
+
+    const filtered = tasks.filter(task => {
+        const d = new Date(task.deadline);
+        d.setHours(0,0,0,0);
+        return d >= today && d <= limit;
+    });
+
+    renderFilteredTasks(filtered);
+}
+
+/* RENDER FILTERED */
+function renderFilteredTasks(filtered) {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    if (filtered.length === 0) {
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <div class="rocket">🚀</div>
+                <h2>No Tasks In This Range</h2>
+            </div>`;
+        return;
+    }
+
+    filtered.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+
+    filtered.forEach(task => {
+        const index = tasks.indexOf(task);
+
+        const div = document.createElement("div");
+        div.classList.add("task");
+
+        if (task.status === "Submitted") {
+            div.classList.add("submitted");
+        }
+
+        div.innerHTML = `
+            <strong>${task.text}</strong>
+            <small>Deadline: ${task.deadline}</small>
+            <small>Status: ${task.status}</small>
+            <div class="actions">
+                ${
+                    task.status === "Submitted"
+                    ? `<button disabled>Submitted ✓</button>`
+                    : `<button onclick="markSubmitted(${index})">Mark Submitted</button>`
+                }
+                <button onclick="deleteTask(${index})">Delete</button>
+            </div>
+        `;
+
+        taskList.appendChild(div);
+    });
+}
+
+/* RENDER ALL */
+function renderTasks() {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    tasks.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+
+    if (tasks.length === 0) {
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <div class="rocket">🚀</div>
+                <h2>No Tasks Yet</h2>
+                <p>Time to Dominate Your Goals</p>
+            </div>`;
+        return;
+    }
+
+    tasks.forEach((task,index)=>{
+        const div = document.createElement("div");
+        div.classList.add("task");
+
+        if (task.status === "Submitted") {
+            div.classList.add("submitted");
+        }
+
+        div.innerHTML = `
+            <strong>${task.text}</strong>
+            <small>Deadline: ${task.deadline}</small>
+            <small>Status: ${task.status}</small>
+            <div class="actions">
+                ${
+                    task.status === "Submitted"
+                    ? `<button disabled>Submitted ✓</button>`
+                    : `<button onclick="markSubmitted(${index})">Mark Submitted</button>`
+                }
+                <button onclick="deleteTask(${index})">Delete</button>
+            </div>
+        `;
+
+        taskList.appendChild(div);
+    });
+}
+
+renderTasks();
+
+</script>
+
+</body>
+</html>    background: radial-gradient(circle at top, #111 0%, #000 60%);
     color: #ff4d4d;
     font-family: 'Segoe UI', sans-serif;
     padding: 40px;
@@ -345,4 +673,5 @@ renderTasks();
 </body>
 
 </html>
+
 
