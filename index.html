@@ -8,6 +8,31 @@
 <style>
 
 /* ===== BODY ===== */
+/* Submitted Task Style */
+.task.submitted {
+    border-left: 4px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0,255,120,0.4);
+    transition: 0.3s ease;
+}
+
+.task.submitted strong {
+    color: #00ff88;
+}
+
+.task.submitted small {
+    color: #00ff88;
+}
+
+/* Fade success animation */
+@keyframes successPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.task.submitted {
+    animation: successPop 0.4s ease;
+}
 body {
     background: radial-gradient(circle at top, #111 0%, #000 60%);
     color: #ff4d4d;
@@ -267,34 +292,45 @@ function renderFilteredTasks(filtered) {
 }
 
 /* RENDER ALL */
-function renderTasks() {
+function renderFilteredTasks(filtered) {
     const taskList = document.getElementById("taskList");
     taskList.innerHTML = "";
 
-    tasks.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
-
-    if (tasks.length === 0) {
+    if (filtered.length === 0) {
         taskList.innerHTML = `
             <div class="empty-state">
                 <div class="rocket">🚀</div>
-                <h2>No Tasks Yet</h2>
-                <p>Time to Dominate Your Goals</p>
+                <h2>No Tasks In This Range</h2>
             </div>
         `;
         return;
     }
 
-    tasks.forEach((task,index)=>{
+    filtered.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+
+    filtered.forEach(task => {
+
+        const originalIndex = tasks.indexOf(task);
+
         const div = document.createElement("div");
         div.classList.add("task");
+
+        // 🔥 IMPORTANT PART
+        if (task.status === "Submitted") {
+            div.classList.add("submitted");
+        }
 
         div.innerHTML = `
             <strong>${task.text}</strong>
             <small>Deadline: ${task.deadline}</small>
             <small>Status: ${task.status}</small>
             <div class="actions">
-                <button onclick="markSubmitted(${index})">Mark Submitted</button>
-                <button onclick="deleteTask(${index})">Delete</button>
+                ${
+                    task.status === "Submitted"
+                    ? `<button disabled style="opacity:0.6; cursor:not-allowed;">Submitted ✓</button>`
+                    : `<button onclick="markSubmitted(${originalIndex})">Mark Submitted</button>`
+                }
+                <button onclick="deleteTask(${originalIndex})">Delete</button>
             </div>
         `;
 
@@ -309,3 +345,4 @@ renderTasks();
 </body>
 
 </html>
+
