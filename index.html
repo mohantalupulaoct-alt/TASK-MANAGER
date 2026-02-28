@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadline Manager</title>
+
+<style>
+
+/* ===== BODY ===== */
+body {
+    background: radial-gradient(circle at top, #111 0%, #000 60%);
+    color: #ff4d4d;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 40px;
+    min-height: 100vh;
+}
+
+/* ===== TITLE ===== */
+h1 {
+    text-align: center;
+    font-size: 40px;
+    margin-bottom: 30px;
+}
+
+/* ===== ACCORDION ===== */
+.accordion-header {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 12px;
+    border: 1px solid #ff4d4d;
+    margin-top: 20px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.accordion-header:hover {
+    background: rgba(255,0,0,0.1);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.accordion-content.open {
+    max-height: 400px;
+}
+
+/* ===== INPUTS ===== */
+input, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ff4d4d;
+    background: #111;
+    color: #ff4d4d;
+}
+
+button {
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #ff4d4d;
+    color: black;
+}
+
+/* ===== TASK CARD ===== */
+.task {
+    background: #111;
+    padding: 15px;
+    margin-top: 20px;
+    border-left: 4px solid #ff4d4d;
+    border-radius: 8px;
+    animation: fadeIn 0.4s ease;
+}
+
+.task small {
+    display: block;
+    margin-top: 5px;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+.actions button {
+    margin-right: 10px;
+    font-size: 12px;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    margin-top: 60px;
+    animation: fadeIn 0.6s ease;
+}
+
+.rocket {
+    font-size: 50px;
+    animation: floatRocket 2s ease-in-out infinite;
+}
+
+@keyframes floatRocket {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <h1>DEADLINE MANAGER</h1>
+</div>
+
+<!-- SIDE MENU -->
+<div class="side-menu" id="sideMenu">
+
+    <div class="accordion">
+
+        <!-- Add Task -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleSection('addSection')">
+                ➕ Add Task
+            </div>
+
+            <div class="accordion-content" id="addSection">
+                <input type="text" id="taskInput" placeholder="Enter Task">
+                <input type="date" id="deadlineInput">
+                <button onclick="addTask()">Add Task</button>
+            </div>
+        </div>
+
+        <!-- Upcoming -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleSection('upcomingSection')">
+                📅 Upcoming Tasks
+            </div>
+
+            <div class="accordion-content" id="upcomingSection">
+                <div onclick="filterTasks(1)">Within 1 Day</div>
+                <div onclick="filterTasks(7)">Within 1 Week</div>
+                <div onclick="filterTasks(14)">Within 2 Weeks</div>
+                <div onclick="filterTasks(30)">Within 1 Month</div>
+                <div onclick="renderTasks()">Show All</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<!-- MAIN CONTENT ONLY -->
+<div class="main-content">
+    <div id="taskList"></div>
+</div>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+/* TOGGLE ACCORDION */
+function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.classList.toggle("open");
+}
+
+/* ADD TASK */
+function addTask() {
+    const text = document.getElementById("taskInput").value.trim();
+    const deadline = document.getElementById("deadlineInput").value;
+
+    if (!text || !deadline) {
+        alert("Enter task and deadline");
+        return;
+    }
+
+    tasks.push({ text, deadline, status: "Pending" });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    document.getElementById("taskInput").value = "";
+    document.getElementById("deadlineInput").value = "";
+
+    renderTasks();
+}
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("overlay");
+
+    menu.classList.toggle("active");
+    overlay.classList.toggle("active");
+}
+
+function closeMenu() {
+    document.getElementById("sideMenu").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+}
+/* DELETE */
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+/* SUBMIT */
+function markSubmitted(index) {
+    tasks[index].status = "Submitted";
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+/* FILTER */
+function filterTasks(days) {
+    const today = new Date();
+    const limit = new Date();
+    limit.setDate(today.getDate() + days);
+
+    const filtered = tasks.filter(task => {
+        const date = new Date(task.deadline);
+        return date >= today && date <= limit;
+    });
+
+    renderFilteredTasks(filtered);
+}
+
+/* RENDER FILTERED */
+function renderFilteredTasks(filtered) {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    if (filtered.length === 0) {
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <div class="rocket">🚀</div>
+                <h2>No Tasks In This Range</h2>
+            </div>
+        `;
+        return;
+    }
+
+    filtered.forEach(task => {
+        const div = document.createElement("div");
+        div.classList.add("task");
+
+        div.innerHTML = `
+            <strong>${task.text}</strong>
+            <small>Deadline: ${task.deadline}</small>
+        `;
+
+        taskList.appendChild(div);
+    });
+}
+
+/* RENDER ALL */
+function renderTasks() {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    tasks.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+
+    if (tasks.length === 0) {
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <div class="rocket">🚀</div>
+                <h2>No Tasks Yet</h2>
+                <p>Time to Dominate Your Goals</p>
+            </div>
+        `;
+        return;
+    }
+
+    tasks.forEach((task,index)=>{
+        const div = document.createElement("div");
+        div.classList.add("task");
+
+        div.innerHTML = `
+            <strong>${task.text}</strong>
+            <small>Deadline: ${task.deadline}</small>
+            <small>Status: ${task.status}</small>
+            <div class="actions">
+                <button onclick="markSubmitted(${index})">Mark Submitted</button>
+                <button onclick="deleteTask(${index})">Delete</button>
+            </div>
+        `;
+
+        taskList.appendChild(div);
+    });
+}
+
+renderTasks();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,338 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}/* Overlay */
+.summary-box {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ff2b2b;
+    animation: fadeIn 0.5s ease;
+}
+
+.summary-box h3 {
+    margin-bottom: 15px;
+}
+/* ===== SIDE MENU ===== */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;              /* hidden by default */
+    width: 280px;
+    height: 100%;
+    background: #0d0d0d;
+    padding: 80px 20px 20px 20px;
+    box-shadow: 5px 0 25px rgba(255,0,0,0.2);
+    transition: left 0.4s ease;
+    z-index: 1000;
+}
+
+/* When open */
+.side-menu.active {
+    left: 0;
+}
+
+/* Dark overlay when menu open */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 900;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Menu button styling */
+.menu-btn {
+    position: absolute;
+    left: 30px;
+    top: 40px;
+    font-size: 26px;
+    cursor: pointer;
+}
+.summary-box p {
+    margin: 6px 0;
+    font-size: 14px;
+}.accordion-header {
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid #ff2b2b;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.accordion-content.open {
+    max-height: 400px;
+}
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100%;
+    background: #0d0d0d;
+    padding: 80px 20px 20px 20px;
+    transition: left 0.4s ease;
+    z-index: 1000;
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+.main-content {
+    padding: 40px;
+    max-width: 800px;
+    margin: auto;
+}
+.accordion-content.open {
+    max-height: 400px;
+}
+
+/* NO TASKS animation */
+.no-tasks {
+    text-align: center;
+    font-size: 22px;
+    margin-top: 60px;
+    opacity: 0.7;
+    animation: floatText 2s ease-in-out infinite;
+}
+
+@keyframes floatText {
+    0% { transform: translateY(0px); opacity: 0.6; }
+    50% { transform: translateY(-8px); opacity: 1; }
+    100% { transform: translateY(0px); opacity: 0.6; }
+}
+
+/* Body Background */
+body {
+    background: radial-gradient(circle at top, #111 0%, #000 60%);
+    color: #ff2b2b;
+    font-family: 'Segoe UI', sans-serif;
+    padding-top: 60px;
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    width: 90%;
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Card Base */
+.card {
+    width: 280px;
+    height: 220px;
+    text-decoration: none;
+    color: #333;
+    background: white;
+    border-radius: 25px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1s ease forwards;
+}/* Top Bar */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.menu-btn {
+    font-size: 28px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.menu-btn:hover {
+    transform: scale(1.2);
+}.section-header {
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 0;
+    border-bottom: 1px solid #ff3c3c;
+}
+
+.section-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section.active .section-content {
+    max-height: 500px;
+    margin-top: 10px;
+}
+
+/* Side Panel */
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: -350px;  /* Hidden on right */
+    width: 320px;
+    height: 100%;
+    background: #0d0d0d;
+    padding: 40px 25px;
+    box-shadow: -10px 0 30px rgba(255,0,0,0.2);
+    transition: right 0.4s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.side-panel.active {
+    right: 0;
+}
+
+.side-panel h2 {
+    margin-bottom: 10px;
+}
+
+/* When Open */
+.side-panel.active {
+    left: 0;
+}
+
+/* Icons */
+.icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+/* Titles */
+.card h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* Description */
+.card p {
+    font-size: 15px;
+    opacity: 0.7;
+}
+
+/* Hover Effects */
+.card:hover {
+    transform: scale(1.07);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.2);
+}
+
+/* Specific Accent Colors */
+.practice {
+    border-top: 6px solid #42a5f5;
+}
+
+.learn {
+    border-top: 6px solid #66bb6a;
+}
+
+/* Entrance Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Background Animation */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .card {
+        width: 90%;
+        height: 200px;
+    }
+}/* Heading Style */
+.main-heading {
+    width: 100%;
+    text-align: center;
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+    color: white;
+    text-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    animation: slideDown 0.8s ease forwards;
+}
+
+/* Smooth entrance animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* Smooth page brightness effect */
+body {
+    transition: filter 0.4s ease;
+}
+
+/* When mouse enters page */
+body:hover {
+    filter: brightness(0.95);
+}
+.container:hover .card {
+    opacity: 1.6;
+    transition: 0.3s ease;
+}
+
+/* Highlight hovered card */
+.card:hover {
+    opacity: 1 !important;
+    transform: scale(5.07);
+}
