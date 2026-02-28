@@ -206,7 +206,7 @@ function markSubmitted(index) {
     taskList.innerHTML = "";
 
     const today = new Date().toISOString().split("T")[0];
-
+    tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
     tasks.forEach((task, index) => {
 
         const taskDiv = document.createElement("div");
@@ -240,4 +240,5 @@ renderTasks();
 </script>
 
 </body>
+
 </html>
